@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knights Of The Zodiac</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-image: url('public/cover.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    #video-player {
+        height: 60vh;
+        width: 80vh;
+        background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5));
+        border-radius: 20px;
+    }
+
+    #video-title {
+      color: white;
+      font-size: 3rem; /* Increase font size */
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Adds a shadow for better visibility */
+    }
+
+    .btn {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <h2 id="video-title"></h2>
+        <video id="video-player" controls autoplay>
+          <source id="video-source" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <div class="mt-3 mb-4">
+          <button id="prev-btn" class="btn btn-primary">Previous</button>
+          <button id="next-btn" class="btn btn-primary ml-2">Next</button>
+          <button id="skip-btn" class="btn btn-warning ml-2">Skip Preview</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    let currentVideoIndex = 0; // Current video index
+    let videos = []; // List of videos
+
+    // Function to load the video
+    function loadVideo(index) {
+      const videoData = videos[index];
+      const videoPlayer = document.getElementById('video-player');
+      const videoSource = document.getElementById('video-source');
+
+      // Update the video title and URL
+      document.getElementById('video-title').innerText = videoData.title;
+      videoSource.src = videoData.videoUrl;
+
+      // Load the video
+      videoPlayer.load();
+      videoPlayer.play();
+    }
+
+    // Function to load the JSON file
+    fetch('public/episodios.json')
+      .then(response => response.json())
+      .then(data => {
+        videos = data; // Assign the loaded data to the videos list
+        loadVideo(currentVideoIndex); // Load the first video
+      })
+      .catch(error => console.error('Error loading the JSON file:', error));
+
+    // Event to move to the next video
+    document.getElementById('next-btn').addEventListener('click', function() {
+      if (currentVideoIndex < videos.length - 1) {
+        currentVideoIndex++; // Increment the video index
+        loadVideo(currentVideoIndex); // Load the next video
+      }
+    });
+
+    // Event to go back to the previous video
+    document.getElementById('prev-btn').addEventListener('click', function() {
+      if (currentVideoIndex > 0) {
+        currentVideoIndex--; // Decrement the video index
+        loadVideo(currentVideoIndex); // Load the previous video
+      }
+    });
+
+    // Event to skip to 2 minutes
+    document.getElementById('skip-btn').addEventListener('click', function() {
+      const videoPlayer = document.getElementById('video-player');
+      videoPlayer.currentTime = 100; // Skip to 2 minutes (120 seconds)
+    });
+
+    // Event triggered when the video is 30 seconds from the end
+    document.getElementById('video-player').addEventListener('timeupdate', function() {
+      const videoPlayer = document.getElementById('video-player');
+      const remainingTime = videoPlayer.duration - videoPlayer.currentTime;
+
+      // If there are 30 seconds remaining, move to the next video
+      if (remainingTime <= 30 && currentVideoIndex < videos.length - 1) {
+        currentVideoIndex++; // Increment the video index
+        loadVideo(currentVideoIndex); // Load the next video
+        const nextVideoPlayer = document.getElementById('video-player');
+        nextVideoPlayer.currentTime = 100; // Skip to 2 minutes in the next video
+      }
+    });
+  </script>
+
+</body>
+</html>
