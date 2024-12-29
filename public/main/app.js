@@ -1,4 +1,4 @@
-function initializeVideoPlayer({ title, jsonFilePath, storageKey }) {
+function initializeVideoPlayer({ title, jsonFilePath, storageKey, skipTime = 30 }) {
   document.getElementById('page-title').innerText = title;
   document.getElementById('video-title').innerText = title;
 
@@ -78,6 +78,16 @@ function initializeVideoPlayer({ title, jsonFilePath, storageKey }) {
   });
 
   const videoPlayer = document.getElementById('video-player');
+  
+  videoPlayer.addEventListener('timeupdate', function () {
+    const timeRemaining = videoPlayer.duration - videoPlayer.currentTime;
+    if (timeRemaining <= skipTime && currentVideoIndex < videos.length - 1) {
+      currentVideoIndex++;
+      loadVideo(currentVideoIndex);
+      saveState();
+    }
+  });
+
   videoPlayer.addEventListener('pause', saveState);
   window.addEventListener('beforeunload', saveState);
 
